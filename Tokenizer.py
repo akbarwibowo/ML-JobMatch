@@ -2,9 +2,9 @@ import tensorflow as tf
 from  tensorflow import  keras
 
 #func to tokenize sentences
-def tokenizer(sentences, num_words, oov_token):
+def tokenizer(sentences, oov_token, vocab_size):
     #make tokenizer
-    tokenizer = keras.preprocessing.text.Tokenizer(num_words=num_words, filters="|/", lower=True, oov_token=oov_token)
+    tokenizer = keras.preprocessing.text.Tokenizer(filters="|/", lower=True, oov_token=oov_token, num_words=vocab_size)
 
     #fit tokenizer into sentences
     tokenizer.fit_on_texts(sentences)
