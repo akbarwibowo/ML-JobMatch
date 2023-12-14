@@ -13,7 +13,7 @@ import sklearn
 from sklearn.model_selection import train_test_split
 
 from Read_Data import read_file
-from One_Hot import to_one_hot
+from One_Hot import all_one_hot
 from Tokenizer import tokenizer
 from Pad_Sequence import padded
 from Split import split_data
@@ -33,30 +33,37 @@ path = './Dataset/data_capstone.csv'
 split_size = 0.9
 num_words = 200
 maxlen = 425
-vocab_size = 300
+vocab_size = 425
+padding = 'post'
+truncating = 'post'
+embedding_dim = 64
 
-data = []
-keys = ['job_title', 'degree', 'key_skills', 'job_experience']
+job_title = read_file(path, 'job_title', True)
+key_skill = read_file(path, 'key_skills', True)
+degree = read_file(path, 'degree', True)
+job_exp = read_file(path, 'job_experience', True)
 
-with open('./Dataset/data_capstone.csv', newline='') as f:
-    read = csv.DictReader(f, delimiter=';')
-    for row in read:
-        item = {}
-        for key in keys:
-            item[key] = row[key].strip()
-        data.append(item)
+x = []
 
-train, test = train_test_split(data, test_size=0.2)
+for i in range(len(key_skill)):
+    key = key_skill[i]
+    deg = degree[i]
+    job = job_exp[i]
+    x.append(key + deg + job)
+x = np.array(x)
 
-x_train = np.array([data['degree']+ " " + data['key_skills']+ " " + data['job_experience'] for data in train])
-x_test = np.array([data['degree'] + data['key_skills'] + data['job_experience'] for data in test])
-print(x_train)
-# y_train = [i['job_title'] for i in train]
-# y_test = [i['job_title'] for i in test]
-#
-# all_y = y_train + y_test
-# all_y = np.array(all_y)
-#
-# num = len(all_y)
-#
-# y_numerate = {label: i for i, en}
+x_train, x_val = split_data(x, split_size)
+
+x_token = tokenizer(x_train, 'oov')
+
+x_train_pad = padded(x_token, x_train, padding, truncating, maxlen)
+x_val_pad = padded(x_token, x_val, padding, truncating, maxlen)
+
+y_train, y_val = split_data(job_title, split_size)
+
+y_train_hot = all_one_hot(y_train)
+y_val_hot = all_one_hot(y_val)
+
+print(x_train_pad.shape, x_val_pad.shape, y_train_hot.shape, y_val_hot.shape)
+print(x_train_pad)
+
